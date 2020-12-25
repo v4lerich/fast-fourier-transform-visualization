@@ -7,7 +7,7 @@ add_library(fft-visualizer::model
         ALIAS ${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE glad2-loader)
+        PRIVATE glad2-loader ${OpenCL_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
-        PUBLIC .)
+        PUBLIC . ${OpenCL_INCLUDE_DIR})
