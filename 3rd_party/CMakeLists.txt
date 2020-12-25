@@ -1,0 +1,5 @@
+add_subdirectory(glad2_loader)
+add_subdirectory(imgui)
+add_subdirectory(icon_font_headers)
+add_subdirectory(fork_awesome)
+add_subdirectory(rubik_font)

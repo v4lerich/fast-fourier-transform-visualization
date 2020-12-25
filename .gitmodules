@@ -1,0 +1,20 @@
+[submodule "3rd_party/fork_awesome/Fork-Awesome"]
+	path = 3rd_party/fork_awesome/Fork-Awesome
+	url = https://github.com/ForkAwesome/Fork-Awesome
+[submodule "3rd_party/glad2_loader/glad"]
+	path = 3rd_party/glad2_loader/glad
+	url = https://github.com/Dav1dde/glad
+	branch = glad2
+[submodule "3rd_party/sdl2-cmake-modules"]
+	path = 3rd_party/sdl2-cmake-modules
+	url = https://github.com/aminosbh/sdl2-cmake-modules
+[submodule "3rd_party/imgui/imgui"]
+	path = 3rd_party/imgui/imgui
+	url = https://github.com/ocornut/imgui
+	branch = docking
+[submodule "3rd_party/icon_font_headers/IconFontCppHeaders"]
+	path = 3rd_party/icon_font_headers/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders
+[submodule "3rd_party/rubik_font/rubik"]
+	path = 3rd_party/rubik_font/rubik
+	url = https://github.com/googlefonts/rubik

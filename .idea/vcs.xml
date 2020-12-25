@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/fork_awesome/Fork-Awesome" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/glad2_loader/glad" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/icon_font_headers/IconFontCppHeaders" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/imgui/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/rubik_font/rubik" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/sdl2-cmake-modules" vcs="Git" />
+  </component>
+</project>
