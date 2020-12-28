@@ -2,6 +2,7 @@ project(fft-visualizer-view)
 
 add_library(${PROJECT_NAME}
         view.h view.cc
+        open_cl_info_view.h open_cl_info_view.cc
         fft_visualizer_view.h fft_visualizer_view.cc)
 
 add_library(fft-visualizer::view

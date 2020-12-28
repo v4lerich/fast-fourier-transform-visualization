@@ -5,6 +5,7 @@
 #include <backends/imgui_impl_sdl.h>
 #include <gl_loader.h>
 #include <glad/gl.h>
+#include <implot.h>
 
 #include "application_configuration.h"
 
@@ -97,7 +98,7 @@ Application::ReturnCode Application::CreateMainWindow() {
     const auto window_flags =
         SDL_WindowFlags(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     main_window_ =
-        SDL_CreateWindow("Image processor", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        SDL_CreateWindow("Fft visualizer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                          configuration::kWindowWidth, configuration::kWindowHeight, window_flags);
 
     gl_context_ = SDL_GL_CreateContext(main_window_);
@@ -113,11 +114,15 @@ Application::ReturnCode Application::CreateMainWindow() {
 auto Application::InitImGui() -> Application::ReturnCode {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
+
     imgui_io_ = &ImGui::GetIO();
     imgui_io_->IniFilename = nullptr;
     imgui_io_->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     imgui_io_->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     imgui_io_->ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
+
+    ImPlot::GetStyle().AntiAliasedLines = true;
 
     if (configuration::kImGuiTheme == configuration::ApplicationTheme::kDark) {
         ImGui::StyleColorsDark();
@@ -130,7 +135,7 @@ auto Application::InitImGui() -> Application::ReturnCode {
     ImGui_ImplSDL2_InitForOpenGL(main_window_, gl_context_);
     ImGui_ImplOpenGL3_Init(configuration::kGlslVersion);
 
-    imgui_io_->Fonts->AddFontFromFileTTF(configuration::kRubikFontPath.c_str(), 17.0F);
+    imgui_io_->Fonts->AddFontFromFileTTF(configuration::kDroidSansFontPath.c_str(), 17.0F);
 
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
@@ -146,6 +151,7 @@ auto Application::Finalize() -> Application::ReturnCode {
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     SDL_GL_DeleteContext(gl_context_);

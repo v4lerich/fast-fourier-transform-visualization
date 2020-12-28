@@ -9,7 +9,8 @@ namespace fft_visualizer::view {
 
 const std::string kDockspaceName = "main_dockspace";
 
-FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model) {}
+FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
+    : opencl_info_view_{model.GetOpenClModel()} {}
 
 void FftVisualizerView::Render() {
     if (BeginDockingWindow()) {
@@ -20,6 +21,8 @@ void FftVisualizerView::Render() {
 
         EndDockingWindow();
     }
+
+    opencl_info_view_.Render();
 }
 
 auto FftVisualizerView::BeginDockingWindow() -> bool {
@@ -35,16 +38,14 @@ auto FftVisualizerView::BeginDockingWindow() -> bool {
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{});
+    bool is_visible = ImGui::Begin("DockSpace", nullptr, window_flags);
+    ImGui::PopStyleVar(2);
 
-    if (ImGui::Begin("DockSpace", nullptr, window_flags)) {
-        ImGui::PopStyleVar();
-
+    if (is_visible) {
         InitDockingLayout();
         ImGui::DockSpace(ImGui::GetID(kDockspaceName.c_str()), {0, 0});
-        return true;
     }
-    ImGui::PopStyleVar();
-    return false;
+    return is_visible;
 }
 
 void FftVisualizerView::InitDockingLayout() {
@@ -62,17 +63,24 @@ void FftVisualizerView::InitDockingLayout() {
 
 void FftVisualizerView::EndDockingWindow() {
     ImGui::End();
-    ImGui::PopStyleVar();
 }
 
 void FftVisualizerView::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Exit", nullptr, false)) {
+            if (ImGui::MenuItem("Exit")) {
                 SetWantClose();
             }
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Info")) {
+            if (ImGui::MenuItem("OpenCl")) {
+                opencl_info_view_.Show();
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
 }

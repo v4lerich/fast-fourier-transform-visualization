@@ -8,6 +8,7 @@ find_package(SDL2 REQUIRED)
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         imgui
+        implot
         ${SDL2_LIBRARIES}
         glad2-loader
         fft-visualizer::view
@@ -18,5 +19,4 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION bin)
 
 add_dependencies(${PROJECT_NAME}
-        fft-visualizer-resources
-        fork-awesome)
+        fft-visualizer-resources)

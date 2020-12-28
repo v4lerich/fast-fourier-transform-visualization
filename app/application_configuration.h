@@ -24,9 +24,9 @@ constexpr auto kOpenGlVersion = OpenGlVersion{.major = 4, .minor = 2};
 constexpr auto kGlslVersion = "#version 420";
 
 const std::string kResourcePath = "./res/";
-const std::string kRubikFontPath = kResourcePath + "fonts/RubikFont/Rubik-Regular.ttf";
+const std::string kDroidSansFontPath = kResourcePath + "fonts/DroidSans.ttf";
 const std::string kForkAwesomeFontPath =
-    kResourcePath + "fonts/ForkAwesomeFont/" + FONT_ICON_FILE_NAME_FK;
+    kResourcePath + "fonts/" + FONT_ICON_FILE_NAME_FK;
 
 }  // namespace fft_visualizer::configuration
 

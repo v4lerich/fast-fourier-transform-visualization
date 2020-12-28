@@ -15,6 +15,6 @@
 [submodule "3rd_party/icon_font_headers/IconFontCppHeaders"]
 	path = 3rd_party/icon_font_headers/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders
-[submodule "3rd_party/rubik_font/rubik"]
-	path = 3rd_party/rubik_font/rubik
-	url = https://github.com/googlefonts/rubik
+[submodule "3rd_party/implot/implot"]
+	path = 3rd_party/implot/implot
+	url = https://github.com/epezent/implot
