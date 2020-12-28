@@ -6,6 +6,7 @@
     <mapping directory="$PROJECT_DIR$/3rd_party/glad2_loader/glad" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rd_party/icon_font_headers/IconFontCppHeaders" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rd_party/imgui/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/3rd_party/implot/implot" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rd_party/rubik_font/rubik" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/3rd_party/sdl2-cmake-modules" vcs="Git" />
   </component>
