@@ -20,8 +20,16 @@ class OpenClWorker : public Worker {
 
   private:
     typedef cl::make_kernel<cl_uint, cl::Buffer&, cl_uint, cl::Buffer&> FourierKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&, cl_uint, cl_bool> FftStepKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&> FftDivideStepKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&> FftShuffleKernel;
 
-    auto LinkKernel(const cl::Program& program, const std::string& kernel_name) -> FourierKernel;
+    void GenericFastFourierTransform(ComplexSignal& harmonics, bool invert);
+    auto CalculateEnqueueArgs(cl::CommandQueue& queue, cl::Event& event, size_t n)
+        -> cl::EnqueueArgs const;
+
+    template <typename T>
+    auto LinkKernel(const cl::Program& program, const std::string& kernel_name) -> T;
     auto ImportProgram(const cl::Context& context, const std::filesystem::path& path)
         -> cl::Program;
     auto BuildProgram(const cl::Context& context, const cl::Program::Sources& program_sources)
@@ -34,8 +42,9 @@ class OpenClWorker : public Worker {
     FourierKernel inverse_dft_kernel_;
 
     cl::Program fft_program_;
-    FourierKernel fft_kernel_;
-    FourierKernel inverse_fft_kernel_;
+    FftStepKernel fft_step_kernel_;
+    FftDivideStepKernel fft_divide_step_kernel_;
+    FftShuffleKernel fft_shuffle_kernel_;
 };
 
 }  // namespace fft_visualizer::model::worker

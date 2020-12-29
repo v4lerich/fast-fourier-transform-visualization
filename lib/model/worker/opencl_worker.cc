@@ -11,13 +11,17 @@ static const std::filesystem::path kFftProgramPath = "./res/kernels/fft_kernels.
 
 OpenClWorker::OpenClWorker(const cl::Context& context)
     : context_{context},
+
       dft_program_{ImportProgram(context, kDftProgramPath)},
-      dft_kernel_{LinkKernel(dft_program_, "dft_kernel")},
-      inverse_dft_kernel_{LinkKernel(dft_program_, "inverse_dft_kernel")},
+      dft_kernel_{LinkKernel<decltype(dft_kernel_)>(dft_program_, "dft_kernel")},
+      inverse_dft_kernel_{
+          LinkKernel<decltype(inverse_dft_kernel_)>(dft_program_, "inverse_dft_kernel")},
 
       fft_program_{ImportProgram(context, kFftProgramPath)},
-      fft_kernel_{LinkKernel(fft_program_, "fft_kernel")},
-      inverse_fft_kernel_{LinkKernel(fft_program_, "inverse_fft_kernel")} {}
+      fft_step_kernel_{LinkKernel<decltype(fft_step_kernel_)>(fft_program_, "fft_step_kernel")},
+      fft_divide_step_kernel_{LinkKernel<decltype(fft_divide_step_kernel_)>(fft_program_, "fft_divide_step_kernel")},
+      fft_shuffle_kernel_{LinkKernel<decltype(fft_shuffle_kernel_)>(fft_program_, "fft_shuffle_kernel")}
+      {}
 
 auto OpenClWorker::ImportProgram(const cl::Context& context, const std::filesystem::path& path)
     -> cl::Program {
@@ -52,8 +56,8 @@ auto OpenClWorker::BuildProgram(const cl::Context& context,
     }
 }
 
-auto OpenClWorker::LinkKernel(const cl::Program& program, const std::string& kernel_name)
-    -> FourierKernel {
+template <typename T>
+auto OpenClWorker::LinkKernel(const cl::Program& program, const std::string& kernel_name) -> T {
     cl_int error = CL_SUCCESS;
     cl::Kernel kernel{program, kernel_name.c_str(), &error};
     if (error != CL_SUCCESS) {
@@ -139,4 +143,78 @@ auto OpenClWorker::InverseDiscreteFourierTransform(const Worker::ComplexSignal& 
     return signal;
 }
 
-}  // namespace fft_visualizer::model::worker
+
+auto OpenClWorker::FastFourierTransform(const Signal & signal) -> ComplexSignal {
+    const auto n = signal.size();
+
+    ComplexSignal harmonics(n);
+    for (size_t i = 0; i < n; i++) {
+        harmonics[i] = signal[i];
+    }
+    GenericFastFourierTransform(harmonics, false);
+    return harmonics;
+}
+
+auto OpenClWorker::InverseFastFourierTransform(const ComplexSignal & harmonics) -> Signal{
+    const auto n = harmonics.size();
+
+    ComplexSignal complex_signal = harmonics;
+    GenericFastFourierTransform(complex_signal, false);
+
+    Signal signal(n);
+    for (size_t i = 0; i < n; i++) {
+        signal[i] = complex_signal[i].real();
+    }
+    return signal;
+}
+
+void OpenClWorker::GenericFastFourierTransform(ComplexSignal& harmonics, bool invert) {
+    const auto n = harmonics.size();
+    std::vector<cl_float2> harmonic_values(n);
+
+    cl_int error = CL_SUCCESS;
+    cl::Event event;
+    cl::CommandQueue queue{context_};
+    auto enqueue_args = CalculateEnqueueArgs(queue,event,n);
+
+    // Create buffers
+    cl::Buffer harmonics_in_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr, &error);
+    cl::Buffer harmonics_out_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr, &error);
+
+    for (size_t i = 0; i < n; i++) {
+        harmonic_values[i] = {harmonics[i].real(), harmonics[i].imag()};
+    }
+    queue.enqueueWriteBuffer(harmonics_in_buffer, CL_TRUE, 0, n * sizeof(cl_float2), harmonic_values.data(), nullptr, &event);
+    queue.finish();
+
+    // Execute algorithm
+    fft_shuffle_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer);
+
+    for (unsigned int m = 2; m <= n; m <<= 1) {
+        std::swap(harmonics_in_buffer, harmonics_out_buffer);
+        fft_step_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer, m, invert);
+    }
+
+    if (invert) {
+        std::swap(harmonics_in_buffer, harmonics_out_buffer);
+        fft_divide_step_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer);
+    }
+    queue.finish();
+
+    // Read result
+    queue.enqueueReadBuffer(harmonics_out_buffer, CL_TRUE, 0, n * sizeof(cl_float2), harmonic_values.data(), nullptr, &event);
+    queue.finish();
+    for (size_t i = 0; i < n; i++) {
+        harmonics[i] = {harmonic_values[i].s0, harmonic_values[i].s1};
+    }
+}
+
+auto OpenClWorker::CalculateEnqueueArgs(cl::CommandQueue& queue, cl::Event& event, size_t n) -> cl::EnqueueArgs const {
+    cl::NDRange local_size{16};
+    size_t local_groups = std::ceil(float(n) / local_size[0]);
+    cl::NDRange global_size{local_groups * local_size[0]};
+    return {queue, event, global_size, local_size};
+}
+
+}
+
