@@ -10,7 +10,9 @@ namespace fft_visualizer::view {
 const std::string kDockspaceName = "main_dockspace";
 
 FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
-    : opencl_info_view_{model.GetOpenClModel()}, worker_picker_view_{model.GetWorkerModel()} {}
+    : opencl_info_view_{model.GetOpenClModel()},
+      worker_picker_view_{model.GetWorkerModel()},
+      worker_view_{model.GetWorkerModel()} {}
 
 void FftVisualizerView::Render() {
     if (BeginDockingWindow()) {
@@ -18,6 +20,9 @@ void FftVisualizerView::Render() {
 
         ImGuiWindowClass window_class;
         window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+
+        ImGui::SetNextWindowClass(&window_class);
+        worker_view_.Render();
 
         EndDockingWindow();
     }
@@ -57,6 +62,9 @@ void FftVisualizerView::InitDockingLayout() {
         ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowViewport()->Size);
 
         ImGuiID dock_main_id = dockspace_id;
+        ImGuiID dock_left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.4, nullptr, &dock_main_id);
+
+        ImGui::DockBuilderDockWindow(worker_view_.GetWindowName().c_str(), dock_left_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
     }
