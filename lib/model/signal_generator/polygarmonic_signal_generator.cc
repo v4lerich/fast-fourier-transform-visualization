@@ -9,8 +9,8 @@ auto PolygarmonicSignalGenerator::Generate(unsigned int count) -> const SignalGe
 
     for (unsigned int i = 0; i < count; i++) {
         float value = 0;
-        for (unsigned int j = 1; j <= garmonics_parameters.size(); j++) {
-            const auto &parameter = garmonics_parameters[j];
+        for (unsigned int j = 1; j <= harmonics_parameters.size(); j++) {
+            const auto &parameter = harmonics_parameters[j];
 
             float phase = 2 * std::numbers::pi * j * i / count - parameter.phase;
             value += parameter.amplitude * std::cos(phase);

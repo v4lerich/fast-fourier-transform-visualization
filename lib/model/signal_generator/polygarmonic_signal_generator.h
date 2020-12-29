@@ -19,14 +19,14 @@ class PolygarmonicSignalGenerator final : public SignalGenerator {
                           typename std::iterator_traits<IteratorType>::value_type>
     PolygarmonicSignalGenerator(IteratorType from, IteratorType to) {
         for (IteratorType it = from; it != to; it++) {
-            garmonics_parameters.push_back(*it);
+            harmonics_parameters.push_back(*it);
         }
     }
 
     auto Generate(unsigned int count) -> Signal const override;
 
   private:
-    std::vector<GarmonicParameters> garmonics_parameters;
+    std::vector<GarmonicParameters> harmonics_parameters;
 };
 
 }  // namespace fft_visualizer::model::signal_generator

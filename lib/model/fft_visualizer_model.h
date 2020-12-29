@@ -4,7 +4,7 @@
 #include <optional>
 
 #include "error.h"
-#include "open_cl_model.h"
+#include "opencl_model.h"
 
 namespace fft_visualizer::model {
 

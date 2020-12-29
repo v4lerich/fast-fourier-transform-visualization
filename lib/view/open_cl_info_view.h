@@ -1,7 +1,7 @@
 #ifndef FFT_VISUALIZER_OPEN_CL_INFO_VIEW_H
 #define FFT_VISUALIZER_OPEN_CL_INFO_VIEW_H
 
-#include <open_cl_model.h>
+#include <opencl_model.h>
 
 #include "view.h"
 

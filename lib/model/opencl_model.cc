@@ -1,4 +1,4 @@
-#include "open_cl_model.h"
+#include "opencl_model.h"
 
 #include <functional>
 

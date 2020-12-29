@@ -1,5 +1,5 @@
-#ifndef FFT_VISUALIZER_OPEN_CL_MODEL_H
-#define FFT_VISUALIZER_OPEN_CL_MODEL_H
+#ifndef FFT_VISUALIZER_OPENCL_MODEL_H
+#define FFT_VISUALIZER_OPENCL_MODEL_H
 
 #include <optional>
 #include <vector>
@@ -37,4 +37,4 @@ class OpenClModel final {
 
 }  // namespace fft_visualizer::model
 
-#endif  // FFT_VISUALIZER_OPEN_CL_MODEL_H
+#endif  // FFT_VISUALIZER_OPENCL_MODEL_H

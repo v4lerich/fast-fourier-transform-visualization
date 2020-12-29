@@ -13,7 +13,6 @@ class Worker {
 
     virtual auto DiscreteFourierTransform(const Signal& signal) -> ComplexSignal = 0;
     virtual auto InverseDiscreteFourierTransform(const ComplexSignal& garmonics) -> Signal = 0;
-
     virtual auto FastFourierTransform(const Signal& signal) -> ComplexSignal = 0;
     virtual auto InverseFastFourierTransform(const ComplexSignal& garmonics) -> Signal = 0;
 };

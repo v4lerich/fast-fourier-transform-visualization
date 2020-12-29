@@ -10,7 +10,7 @@ class GarmonicSignalGenerator final : public SignalGenerator {
     struct Parameters {
         float amplitude;
         float phase;
-        float garmonic;
+        float harmonic;
     };
 
     GarmonicSignalGenerator(Parameters parameters);

@@ -9,22 +9,24 @@
 namespace fft_visualizer::model {
 
 auto CpuWorker::DiscreteFourierTransform(const Signal& signal) -> ComplexSignal {
+    using namespace std::complex_literals;
+
     auto n = signal.size();
     auto m = n / 2 + 1;
 
-    ComplexSignal garmonics(m);
+    ComplexSignal harmonics(m);
     for (unsigned int j = 0; j < m; j++) {
-        auto& garmonic = garmonics[j];
+        auto& harmonic = harmonics[j];
         for (unsigned int i = 0; i < n; i++) {
-            std::complex<float> phase = 2 * std::numbers::pi * i * j / n;
-            garmonic += 2.0f / n * signal[i] * std::exp(phase);
+            std::complex<float> phase = float(2 * std::numbers::pi * i * j / n) * 1if;
+            harmonic += 2.0f / n * signal[i] * std::exp(phase);
         }
     }
-    return garmonics;
+    return harmonics;
 }
 
-auto CpuWorker::InverseDiscreteFourierTransform(const ComplexSignal& garmonics) -> Signal {
-    auto m = garmonics.size();
+auto CpuWorker::InverseDiscreteFourierTransform(const ComplexSignal& harmonics) -> Signal {
+    auto m = harmonics.size();
     auto n = m * 2;
 
     Signal signal(n, 0);
@@ -32,17 +34,17 @@ auto CpuWorker::InverseDiscreteFourierTransform(const ComplexSignal& garmonics) 
         auto& value = signal[i];
 
         for (unsigned int j = 0; j < m; j++) {
-            const auto& garmonic = garmonics[j];
+            const auto& harmonic = harmonics[j];
 
-            float phase = 2 * std::numbers::pi * i * j / n - std::arg(garmonic);
-            value += n * std::norm(garmonic) * std::cos(phase);
+            float phase = 2 * std::numbers::pi * i * j / n - std::arg(harmonic);
+            value += std::norm(harmonic) * std::cos(phase);
         }
     }
     return signal;
 }
 
-auto CpuWorker::FastFourierTransform(const Signal& signal) -> ComplexSignal {}
+//auto CpuWorker::FastFourierTransform(const Signal& signal) -> ComplexSignal {}
 
-auto CpuWorker::InverseFastFourierTransform(const ComplexSignal& signal) -> Signal {}
+//auto CpuWorker::InverseFastFourierTransform(const ComplexSignal& signal) -> Signal {}
 
 }  // namespace fft_visualizer::model
