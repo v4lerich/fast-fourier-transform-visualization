@@ -4,7 +4,7 @@
 #include <complex>
 #include <vector>
 
-namespace fft_visualizer::model {
+namespace fft_visualizer::model::worker {
 
 class Worker {
   public:
@@ -17,6 +17,6 @@ class Worker {
     virtual auto InverseFastFourierTransform(const ComplexSignal& garmonics) -> Signal = 0;
 };
 
-}  // namespace fft_visualizer::model
+}  // namespace fft_visualizer::model::worker
 
 #endif  // FFT_VISUALIZER_WORKER_H

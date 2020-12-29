@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-namespace fft_visualizer::model {
+namespace fft_visualizer::model::worker {
 
 static const std::filesystem::path kDftProgramPath = "./res/kernels/dft_kernels.cl";
 static const std::filesystem::path kFftProgramPath = "./res/kernels/fft_kernels.cl";
@@ -71,7 +71,7 @@ auto OpenClWorker::DiscreteFourierTransform(const Signal& signal) -> ComplexSign
     unsigned int n = signal.size();
     cl::Buffer signal_buffer{context_, CL_MEM_READ_ONLY, n * sizeof(cl_float), nullptr, &error};
 
-    unsigned int m = n / 2 + 1;
+    unsigned int m = n;  // TODO: fix M size to half
     cl::Buffer harmonics_buffer{context_, CL_MEM_WRITE_ONLY, m * sizeof(cl_float2), nullptr,
                                 &error};
 
@@ -111,7 +111,7 @@ auto OpenClWorker::InverseDiscreteFourierTransform(const Worker::ComplexSignal& 
     unsigned int m = harmonics.size();
     cl::Buffer harmonics_buffer{context_, CL_MEM_READ_ONLY, m * sizeof(cl_float2), nullptr, &error};
 
-    unsigned int n = m * 2;
+    unsigned int n = m;  // TODO: fix M size to half
     cl::Buffer signal_buffer{context_, CL_MEM_WRITE_ONLY, n * sizeof(cl_float), nullptr, &error};
 
     std::vector<cl_float2> harmonic_values(m);
@@ -139,4 +139,4 @@ auto OpenClWorker::InverseDiscreteFourierTransform(const Worker::ComplexSignal& 
     return signal;
 }
 
-}  // namespace fft_visualizer::model
+}  // namespace fft_visualizer::model::worker

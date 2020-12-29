@@ -3,9 +3,9 @@ project(fft-visualizer-model)
 add_library(${PROJECT_NAME}
         error.h error.cc
 
-        worker.h worker.cc
-        cpu_worker.h cpu_worker.cc
-        opencl_worker.h opencl_worker.cc
+        worker/worker.h worker/worker.cc
+        worker/cpu_worker.h worker/cpu_worker.cc
+        worker/opencl_worker.h worker/opencl_worker.cc
 
         opencl_model.h opencl_model.cc
         fft_visualizer_model.h fft_visualizer_model.cc

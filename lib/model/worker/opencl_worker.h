@@ -6,7 +6,7 @@
 #include "opencl.h"
 #include "worker.h"
 
-namespace fft_visualizer::model {
+namespace fft_visualizer::model::worker {
 
 class OpenClWorker : public Worker {
   public:
@@ -38,6 +38,6 @@ class OpenClWorker : public Worker {
     FourierKernel inverse_fft_kernel_;
 };
 
-}  // namespace fft_visualizer::model
+}  // namespace fft_visualizer::model::worker
 
 #endif  // FFT_VISUALIZER_OPENCL_WORKER_H
