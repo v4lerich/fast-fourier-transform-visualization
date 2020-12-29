@@ -5,6 +5,7 @@
 
 #include "error.h"
 #include "opencl_model.h"
+#include "worker_model.h"
 
 namespace fft_visualizer::model {
 
@@ -13,11 +14,13 @@ class FftVisualizerModel final  {
     FftVisualizerModel();
 
     auto GetOpenClModel() -> OpenClModel&;
+    auto GetWorkerModel() -> WorkerModel&;
     void SetCurrentError(std::optional<Error> error);
 
   private:
     std::optional<Error> error_;
     OpenClModel opencl_model_;
+    WorkerModel worker_model_;
 };
 
 }  // namespace fft_visualizer::model

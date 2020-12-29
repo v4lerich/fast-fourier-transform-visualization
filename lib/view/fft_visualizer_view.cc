@@ -10,7 +10,7 @@ namespace fft_visualizer::view {
 const std::string kDockspaceName = "main_dockspace";
 
 FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
-    : opencl_info_view_{model.GetOpenClModel()} {}
+    : opencl_info_view_{model.GetOpenClModel()}, worker_picker_view_{model.GetWorkerModel()} {}
 
 void FftVisualizerView::Render() {
     if (BeginDockingWindow()) {
@@ -23,6 +23,7 @@ void FftVisualizerView::Render() {
     }
 
     opencl_info_view_.Render();
+    worker_picker_view_.Render();
 }
 
 auto FftVisualizerView::BeginDockingWindow() -> bool {
@@ -61,15 +62,20 @@ void FftVisualizerView::InitDockingLayout() {
     }
 }
 
-void FftVisualizerView::EndDockingWindow() {
-    ImGui::End();
-}
+void FftVisualizerView::EndDockingWindow() { ImGui::End(); }
 
 void FftVisualizerView::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Exit")) {
                 SetWantClose();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Worker")) {
+            if (ImGui::MenuItem("Choose device")) {
+                worker_picker_view_.Show();
             }
             ImGui::EndMenu();
         }

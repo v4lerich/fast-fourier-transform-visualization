@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
         worker/opencl_worker.h worker/opencl_worker.cc
 
         opencl_model.h opencl_model.cc
+        worker_model.h worker_model.cc
         fft_visualizer_model.h fft_visualizer_model.cc
 
         signal_generator/signal_generator.h signal_generator/signal_generator.cc
