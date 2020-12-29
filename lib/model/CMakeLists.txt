@@ -12,8 +12,8 @@ add_library(${PROJECT_NAME}
         fft_visualizer_model.h fft_visualizer_model.cc
 
         signal_generator/signal_generator.h signal_generator/signal_generator.cc
-        signal_generator/polygarmonic_signal_generator.h signal_generator/polygarmonic_signal_generator.cc
-        signal_generator/garmonic_signal_generator.h signal_generator/garmonic_signal_generator.cc)
+        signal_generator/polyharmonic_signal_generator.h signal_generator/polyharmonic_signal_generator.cc
+        signal_generator/harmonic_signal_generator.h signal_generator/harmonic_signal_generator.cc)
 
 add_library(fft-visualizer::model
         ALIAS ${PROJECT_NAME})

@@ -1,10 +1,10 @@
-#include "polygarmonic_signal_generator.h"
+#include "polyharmonic_signal_generator.h"
 
 #include <numbers>
 
 namespace fft_visualizer::model::signal_generator {
 
-auto PolygarmonicSignalGenerator::Generate(unsigned int count) -> const SignalGenerator::Signal {
+auto PolyharmonicSignalGenerator::Generate(unsigned int count) -> const SignalGenerator::Signal {
     Signal signal(count);
 
     for (unsigned int i = 0; i < count; i++) {
