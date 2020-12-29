@@ -4,6 +4,10 @@
 
 namespace fft_visualizer::model {
 
-FftVisualizerModel::FftVisualizerModel() = default;
+FftVisualizerModel::FftVisualizerModel() : opencl_model_{*this} {}
+
+void FftVisualizerModel::SetCurrentError(std::optional<Error> error) { error_ = error; }
+
+auto FftVisualizerModel::GetOpenClModel() -> OpenClModel& { return opencl_model_; }
 
 }  // namespace fft_visualizer::model

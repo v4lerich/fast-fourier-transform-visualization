@@ -1,0 +1,12 @@
+#ifndef FFT_VISUALIZER_OPENCL_H
+#define FFT_VISUALIZER_OPENCL_H
+
+#define __CL_ENABLE_EXCEPTIONS
+
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <OpenCL/cl.hpp>
+#else
+#include <CL/cl.hpp>
+#endif
+
+#endif  // FFT_VISUALIZER_OPENCL_H

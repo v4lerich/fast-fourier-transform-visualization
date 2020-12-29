@@ -18,6 +18,9 @@ target_compile_definitions(${PROJECT_NAME}
         PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD2
         PUBLIC IMGUI_DEFINE_MATH_OPERATORS IMGUI_USER_CONFIG="./imguiconfig.h")
 
+add_custom_target(droidsans-font ALL
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/imgui/misc/fonts/DroidSans.ttf ${RESOURCE_PATH}/fonts/DroidSans.ttf)
+
 target_include_directories(${PROJECT_NAME}
         PUBLIC imgui . ${SDL2_INCLUDE_DIRS})
 
