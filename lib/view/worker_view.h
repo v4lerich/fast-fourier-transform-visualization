@@ -30,13 +30,17 @@ class WorkerView : public View {
     void RenderSignalTypeCombo();
     void RenderHarmonicSignalParameters();
     void RenderPolyharmonicSignalParameters();
+    void RenderAlgorithmTypeCombo(std::string label, model::AlgorithmType& algorithm_type);
 
     void RandomizeSignalParameters();
-    void GenerateSignal();
+    void RunWorker();
     static auto GetNValue(unsigned int index) -> unsigned int;
 
     Model& model_;
     std::string window_name_;
+
+    model::AlgorithmType algorithm_type_{model::AlgorithmType::kTrivial};
+    model::AlgorithmType inverse_algorithm_type_{model::AlgorithmType::kTrivial};
 
     unsigned int n_;
     SignalType signal_type_{SignalType::kHarmonic};

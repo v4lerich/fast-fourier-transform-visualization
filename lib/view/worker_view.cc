@@ -17,11 +17,15 @@ static std::map<SignalType, std::string> kSignalTypeOptions = {
     {SignalType::kHarmonic, "Harmonic"},
     {SignalType::kPolyharmonic, "Polyharmonic"},
 };
+static std::map<model::AlgorithmType, std::string> kAlgorithmTypeOptions = {
+    {model::AlgorithmType::kTrivial, "Trivial"},
+    {model::AlgorithmType::kFast, "Fast"},
+};
 
 template <typename T>
 using Range = std::pair<T, T>;
 
-static Range<float> kAmplitudeRange = {-100.0f, +100.0f};
+static Range<float> kAmplitudeRange = {-20.0f, +20.0f};
 static Range<float> kPhaseRange = {0, 2 * std::numbers::pi_v<float>};
 static Range<float> kHarmonicRange = {0, +100};
 static Range<int> kHarmonicsCountRange = {1, 100};
@@ -56,9 +60,12 @@ void WorkerView::Render() {
 
         CenterText("Control");
         ImGui::Separator();
-        if (ImGui::Button("Generate signal")) {
-            GenerateSignal();
+        if (ImGui::Button("Run")) {
+            RunWorker();
         }
+
+        RenderAlgorithmTypeCombo("Forward algorithm", algorithm_type_);
+        RenderAlgorithmTypeCombo("Inverse algorithm", inverse_algorithm_type_);
 
         ImGui::End();
     }
@@ -97,7 +104,7 @@ void WorkerView::RenderSignalTypeCombo() {
 void WorkerView::RenderHarmonicSignalParameters() {
     ImGui::DragFloat("Amplitude", &harmonic_parameters_.amplitude, 0.1f, kAmplitudeRange.first,
                      kAmplitudeRange.second);
-    ImGui::DragFloat("Phase", &harmonic_parameters_.phase, 0.01f, kPhaseRange.second,
+    ImGui::DragFloat("Phase", &harmonic_parameters_.phase, 0.01f, kPhaseRange.first,
                      kPhaseRange.second);
     ImGui::DragFloat("Harmonic", &harmonic_parameters_.harmonic, 0.1f, kHarmonicRange.first,
                      kHarmonicRange.second);
@@ -137,14 +144,27 @@ void WorkerView::RenderPolyharmonicSignalParameters() {
     }
 }
 
+void WorkerView::RenderAlgorithmTypeCombo(std::string label, model::AlgorithmType& algorithm_type) {
+    if (ImGui::BeginCombo(label.c_str(), kAlgorithmTypeOptions[algorithm_type].c_str())) {
+        for (const auto& [value, name] : kAlgorithmTypeOptions) {
+            bool is_selected = value == algorithm_type;
+            if (ImGui::Selectable(name.c_str(), is_selected)) algorithm_type = value;
+            if (is_selected) ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+    }
+}
+
 auto WorkerView::GetNValue(unsigned int index) -> unsigned int { return 1 << kLogNOptions[index]; }
 
 void WorkerView::RandomizeSignalParameters() {
     std::mt19937 generator(random_device_());
     std::uniform_real_distribution<float> harmonic_distribution(kHarmonicRange.first,
                                                                 kHarmonicRange.second);
-    std::normal_distribution<float> amplitude_distribution((kAmplitudeRange.first + kAmplitudeRange.second) / 2,
-                                                           (kAmplitudeRange.second - kAmplitudeRange.first) / 6);
+    std::normal_distribution<float> amplitude_distribution(
+        (kAmplitudeRange.first + kAmplitudeRange.second) / 2,
+        (kAmplitudeRange.second - kAmplitudeRange.first) / 6);
     std::uniform_real_distribution<float> phase_distribution(kPhaseRange.first, kPhaseRange.second);
 
     harmonic_parameters_.amplitude = amplitude_distribution(generator);
@@ -157,7 +177,7 @@ void WorkerView::RandomizeSignalParameters() {
     }
 }
 
-void WorkerView::GenerateSignal() {
+void WorkerView::RunWorker() {
     std::unique_ptr<model::signal_generator::SignalGenerator> signal_generator;
     if (signal_type_ == SignalType::kHarmonic) {
         signal_generator = std::make_unique<model::signal_generator::HarmonicSignalGenerator>(
@@ -170,6 +190,8 @@ void WorkerView::GenerateSignal() {
     if (signal_generator) {
         const auto signal = signal_generator->Generate(n_);
         model_.SetInitialSignal(signal);
+
+        model_.RunWorker(algorithm_type_, inverse_algorithm_type_);
     }
 }
 

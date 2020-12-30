@@ -13,10 +13,10 @@ auto CpuWorker::DiscreteFourierTransform(const Signal& signal) -> ComplexSignal 
 
     ComplexSignal harmonics(m);
     for (unsigned int j = 0; j < m; j++) {
-        auto& harmonic = harmonics[j];
+        auto& harmonic = harmonics[j] = 0;
         for (unsigned int i = 0; i < n; i++) {
             std::complex<float> phase = float(2 * std::numbers::pi * i * j / n) * 1if;
-            harmonic += 2.0f / n * signal[i] * std::exp(phase);
+            harmonic += 1.0f / n * signal[i] * std::exp(phase);
         }
     }
     return harmonics;
@@ -34,7 +34,7 @@ auto CpuWorker::InverseDiscreteFourierTransform(const ComplexSignal& harmonics) 
             const auto& harmonic = harmonics[j];
 
             float phase = 2 * std::numbers::pi * i * j / n - std::arg(harmonic);
-            value += std::norm(harmonic) * std::cos(phase);
+            value += std::abs(harmonic) * std::cos(phase);
         }
     }
     return signal;
@@ -42,7 +42,7 @@ auto CpuWorker::InverseDiscreteFourierTransform(const ComplexSignal& harmonics) 
 
 auto CpuWorker::FastFourierTransform(const Signal& signal) -> ComplexSignal {
     const auto initial_n = signal.size();
-    const size_t n = std::pow(std::ceil(std::log2(initial_n)), 2);
+    const size_t n = std::pow(2, std::ceil(std::log2f(initial_n)));
 
     ComplexSignal harmonics(n);
     for (size_t i = 0; i < initial_n; i++) {
@@ -64,12 +64,11 @@ void CpuWorker::GenericFastFourierTransform(Worker::ComplexSignal& harmonics, bo
             reverse_index <<= 1;
             reverse_index += bool(i & j);
         }
-
-        harmonics[reverse_index] = harmonics[i];
+        if (reverse_index < i) std::swap(harmonics[reverse_index], harmonics[i]);
     }
 
     const auto w_sign = invert ? -1 : 1;
-    for (unsigned int m = 2; m <= n; m <<= 1) {
+    for (unsigned int m = 1; m <= n; m <<= 1) {
         const auto w_m_phase = w_sign * 2.0f * std::numbers::pi_v<float> / m * 1if;
         const auto w_m = std::exp(w_m_phase);
 
@@ -88,7 +87,7 @@ void CpuWorker::GenericFastFourierTransform(Worker::ComplexSignal& harmonics, bo
         }
     }
 
-    if (invert)
+    if (!invert)
         for (auto& harmonic : harmonics) {
             harmonic /= n;
         }
@@ -96,7 +95,7 @@ void CpuWorker::GenericFastFourierTransform(Worker::ComplexSignal& harmonics, bo
 
 auto CpuWorker::InverseFastFourierTransform(const ComplexSignal& harmonics) -> Signal {
     const auto initial_n = harmonics.size();
-    const size_t n = std::pow(std::ceil(std::log2(initial_n)), 2);
+    const size_t n = std::pow(2, std::ceil(std::log2(initial_n)));
 
     ComplexSignal complex_signal(n);
     for (size_t i = 0; i < initial_n; i++) {

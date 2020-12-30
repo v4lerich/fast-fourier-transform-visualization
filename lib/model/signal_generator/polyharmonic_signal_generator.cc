@@ -9,10 +9,10 @@ auto PolyharmonicSignalGenerator::Generate(unsigned int count) -> const SignalGe
 
     for (unsigned int i = 0; i < count; i++) {
         float value = 0;
-        for (unsigned int j = 1; j <= harmonics_parameters.size(); j++) {
+        for (unsigned int j = 0; j < harmonics_parameters.size(); j++) {
             const auto &parameter = harmonics_parameters[j];
 
-            float phase = 2 * std::numbers::pi * j * i / count - parameter.phase;
+            float phase = 2 * std::numbers::pi * (j + 1) * i / count - parameter.phase;
             value += parameter.amplitude * std::cos(phase);
         }
         signal[i] = value;

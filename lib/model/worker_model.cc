@@ -24,13 +24,44 @@ void WorkerModel::InitWorker(std::optional<cl::Device> device) {
     }
 }
 
+auto WorkerModel::GetRunVersion() -> unsigned int { return run_version_; }
+
+void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type) {
+    if (initial_signal_) {
+        if (algorithm_type == AlgorithmType::kTrivial) {
+            harmonics_ = worker_->DiscreteFourierTransform(*initial_signal_);
+        } else if (algorithm_type == AlgorithmType::kFast) {
+            harmonics_ = worker_->FastFourierTransform(*initial_signal_);
+        }
+
+        if (inverse_algorithm_type == AlgorithmType::kTrivial) {
+            recovered_signal_ = worker_->InverseDiscreteFourierTransform(*harmonics_);
+        } else if (inverse_algorithm_type == AlgorithmType::kFast) {
+            recovered_signal_ = worker_->InverseFastFourierTransform(*harmonics_);
+        }
+
+        harmonics_amplitudes_ = Signal(harmonics_->size());
+        harmonics_phases_ = Signal(harmonics_->size());
+        for (size_t i = 0; i < harmonics_->size(); i++) {
+            (*harmonics_amplitudes_)[i] = std::abs((*harmonics_)[i]);
+            (*harmonics_phases_)[i] = std::arg((*harmonics_)[i]);
+        }
+    }
+}
+
 void WorkerModel::SetInitialSignal(const Signal& signal) {
-    initial_signal_version_++;
+    run_version_++;
     initial_signal_ = signal;
 }
 
 auto WorkerModel::GetInitialSignal() -> const std::optional<Signal>& { return initial_signal_; }
 
-auto WorkerModel::GetInitialSignalVersion() -> unsigned int { return initial_signal_version_; }
+auto WorkerModel::GetHarmonicPhases() -> const std::optional<Signal>& { return harmonics_phases_; }
+
+auto WorkerModel::GetHarmonicAmplitudes() -> const std::optional<Signal>& {
+    return harmonics_amplitudes_;
+}
+
+auto WorkerModel::GetRecoveredSignal() -> const std::optional<Signal>& { return recovered_signal_; }
 
 }  // namespace fft_visualizer::model

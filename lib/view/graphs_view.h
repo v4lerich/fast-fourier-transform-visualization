@@ -16,11 +16,13 @@ class GraphsView final : public View {
     auto GetWindowName() -> const std::string&;
 
   private:
+    void RenderSignalsGraph();
+    void RenderHarmonicsGraph();
+
     WorkerModel& worker_model_;
     std::string window_name_;
 
-    unsigned int initial_signal_version_{0};
-    void RenderSignalsGraph();
+    unsigned int run_version_{0};
 };
 
 }  // namespace fft_visualizer::view
