@@ -23,12 +23,20 @@ class WorkerModel {
     using Signal = worker::Worker::Signal;
     using ComplexSignal = worker::Worker::ComplexSignal;
 
+    struct Configuration {
+        AlgorithmType algorithm_type{model::AlgorithmType::kTrivial};
+        AlgorithmType inverse_algorithm_type{model::AlgorithmType::kTrivial};
+
+        bool erase_phases{false};
+        unsigned int preserve_harmonics_from{0};
+        unsigned int preserve_harmonics_to{std::numeric_limits<int>::max()};
+    };
+
     explicit WorkerModel(Model& model, OpenClModel& opencl_model);
 
     auto GetOpenClModel() -> OpenClModel&;
     void InitWorker(std::optional<cl::Device> device);
-    void RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type,
-                   bool is_erasing_recovery_phases);
+    void RunWorker(Configuration configuration);
 
     auto GetRunVersion() -> unsigned int;
 
@@ -53,6 +61,8 @@ class WorkerModel {
 
     unsigned int run_version_{0};
     std::unique_ptr<worker::Worker> worker_;
+
+    void TransformHarmonics(ComplexSignal& harmonics, const Configuration& configuration);
 };
 
 }  // namespace fft_visualizer::model

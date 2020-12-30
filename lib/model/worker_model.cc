@@ -35,20 +35,19 @@ void WorkerModel::InitWorker(std::optional<cl::Device> device) {
 
 auto WorkerModel::GetRunVersion() -> unsigned int { return run_version_; }
 
-void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type,
-                            bool is_erasing_recovery_phases) {
+void WorkerModel::RunWorker(Configuration configuration) {
     if (initial_signal_) {
         try {
+            const auto& [algorithm_type, inverse_algorithm_type, _, __, ___] = configuration;
+
             if (algorithm_type == AlgorithmType::kTrivial) {
                 harmonics_ = worker_->DiscreteFourierTransform(*initial_signal_);
             } else if (algorithm_type == AlgorithmType::kFast) {
                 harmonics_ = worker_->FastFourierTransform(*initial_signal_);
             }
 
-            if (harmonics_ && is_erasing_recovery_phases) {
-                for (auto &harmonic : *harmonics_) {
-                    harmonic = std::abs(harmonic);
-                }
+            if (harmonics_) {
+                TransformHarmonics(*harmonics_, configuration);
             }
 
             harmonics_amplitudes_ = Signal(harmonics_->size());
@@ -86,5 +85,22 @@ auto WorkerModel::GetHarmonicAmplitudes() -> const std::optional<Signal>& {
 }
 
 auto WorkerModel::GetRecoveredSignal() -> const std::optional<Signal>& { return recovered_signal_; }
+
+void WorkerModel::TransformHarmonics(ComplexSignal& harmonics,
+                                     const WorkerModel::Configuration& configuration) {
+    const auto& [_, __, erase_phases, preserve_harmonics_from, preserve_harmonics_to] =
+        configuration;
+    const size_t n = harmonics.size();
+    for (size_t harmonic_index = 0; harmonic_index < n; harmonic_index++) {
+        auto& harmonic = harmonics[harmonic_index];
+        if (erase_phases) harmonic = std::abs(harmonic);
+
+        const bool preserve =
+            preserve_harmonics_from <= harmonic_index && harmonic_index <= preserve_harmonics_to ||
+            (n - preserve_harmonics_to) <= harmonic_index &&
+                harmonic_index <= (n - preserve_harmonics_from);
+        if (!preserve) harmonic = 0;
+    }
+}
 
 }  // namespace fft_visualizer::model

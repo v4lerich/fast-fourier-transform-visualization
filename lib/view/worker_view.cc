@@ -64,9 +64,12 @@ void WorkerView::Render() {
             RunWorker();
         }
 
-        RenderAlgorithmTypeCombo("Forward algorithm", algorithm_type_);
-        RenderAlgorithmTypeCombo("Inverse algorithm", inverse_algorithm_type_);
-        ImGui::Checkbox("Erase phases for recovering signal?", &is_erasing_recovery_phases_);
+        RenderAlgorithmTypeCombo("Forward algorithm", configuration_.algorithm_type);
+        RenderAlgorithmTypeCombo("Inverse algorithm", configuration_.inverse_algorithm_type);
+        ImGui::Checkbox("Erase phases for recovering signal?", &configuration_.erase_phases);
+        ImGui::DragIntRange2(
+            "Preserve harmonics", reinterpret_cast<int*>(&configuration_.preserve_harmonics_from),
+            reinterpret_cast<int*>(&configuration_.preserve_harmonics_to), 1.0f, 0, n_);
 
         ImGui::End();
     }
@@ -192,7 +195,7 @@ void WorkerView::RunWorker() {
         const auto signal = signal_generator->Generate(n_);
         model_.SetInitialSignal(signal);
 
-        model_.RunWorker(algorithm_type_, inverse_algorithm_type_, is_erasing_recovery_phases_);
+        model_.RunWorker(configuration_);
     }
 }
 
