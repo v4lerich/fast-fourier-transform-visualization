@@ -35,7 +35,8 @@ void WorkerModel::InitWorker(std::optional<cl::Device> device) {
 
 auto WorkerModel::GetRunVersion() -> unsigned int { return run_version_; }
 
-void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type) {
+void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type,
+                            bool is_erasing_recovery_phases) {
     if (initial_signal_) {
         try {
             if (algorithm_type == AlgorithmType::kTrivial) {
@@ -44,10 +45,10 @@ void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_
                 harmonics_ = worker_->FastFourierTransform(*initial_signal_);
             }
 
-            if (inverse_algorithm_type == AlgorithmType::kTrivial) {
-                recovered_signal_ = worker_->InverseDiscreteFourierTransform(*harmonics_);
-            } else if (inverse_algorithm_type == AlgorithmType::kFast) {
-                recovered_signal_ = worker_->InverseFastFourierTransform(*harmonics_);
+            if (harmonics_ && is_erasing_recovery_phases) {
+                for (auto &harmonic : *harmonics_) {
+                    harmonic = std::abs(harmonic);
+                }
             }
 
             harmonics_amplitudes_ = Signal(harmonics_->size());
@@ -58,6 +59,12 @@ void WorkerModel::RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_
                 (*harmonics_amplitudes_)[i] = std::abs(amplitude) >= kEpsilon ? amplitude : 0;
                 (*harmonics_phases_)[i] =
                     std::abs(amplitude) >= kEpsilon ? std::arg((*harmonics_)[i]) : 0;
+            }
+
+            if (inverse_algorithm_type == AlgorithmType::kTrivial) {
+                recovered_signal_ = worker_->InverseDiscreteFourierTransform(*harmonics_);
+            } else if (inverse_algorithm_type == AlgorithmType::kFast) {
+                recovered_signal_ = worker_->InverseFastFourierTransform(*harmonics_);
             }
         } catch (Error& error) {
             model_.SetCurrentError(error);

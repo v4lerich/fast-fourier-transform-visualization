@@ -48,6 +48,7 @@ class WorkerView : public View {
     model::signal_generator::PolyharmonicSignalGenerator::Parameters polyharmonic_parameters_{1};
 
     std::random_device random_device_{};
+    bool is_erasing_recovery_phases_{};
 };
 
 }  // namespace fft_visualizer::view

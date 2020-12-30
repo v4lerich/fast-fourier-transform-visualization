@@ -66,6 +66,7 @@ void WorkerView::Render() {
 
         RenderAlgorithmTypeCombo("Forward algorithm", algorithm_type_);
         RenderAlgorithmTypeCombo("Inverse algorithm", inverse_algorithm_type_);
+        ImGui::Checkbox("Erase phases for recovering signal?", &is_erasing_recovery_phases_);
 
         ImGui::End();
     }
@@ -191,7 +192,7 @@ void WorkerView::RunWorker() {
         const auto signal = signal_generator->Generate(n_);
         model_.SetInitialSignal(signal);
 
-        model_.RunWorker(algorithm_type_, inverse_algorithm_type_);
+        model_.RunWorker(algorithm_type_, inverse_algorithm_type_, is_erasing_recovery_phases_);
     }
 }
 

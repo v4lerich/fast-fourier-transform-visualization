@@ -18,6 +18,8 @@ class GraphsView final : public View {
   private:
     void RenderSignalsGraph();
     void RenderHarmonicsGraph();
+    auto CalculatePlotStride(size_t count) -> size_t;
+    auto CalculatePlotSize(size_t count) -> size_t;
 
     WorkerModel& worker_model_;
     std::string window_name_;

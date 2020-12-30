@@ -5,6 +5,8 @@
 
 namespace fft_visualizer::view {
 
+constexpr size_t kMaxViewSize = 1 << 14;
+
 GraphsView::GraphsView(WorkerModel& worker_model, std::string window_name)
     : worker_model_{worker_model}, window_name_{window_name} {}
 
@@ -53,10 +55,16 @@ void GraphsView::RenderSignalsGraph() {
     const auto plot_height = ImGui::GetContentRegionAvail().y * 0.5f;
     if (ImPlot::BeginPlot("Signals", nullptr, nullptr, {-1, plot_height})) {
         if (initial_signal) {
-            ImPlot::PlotLine("Initial", initial_signal->data(), initial_signal->size());
+            size_t size = CalculatePlotSize(initial_signal->size());
+            size_t stride = CalculatePlotStride(initial_signal->size());
+            ImPlot::PlotLine("Initial", initial_signal->data(), size, stride, 0, 0,
+                             stride * sizeof(float));
         }
         if (recovered_signal) {
-            ImPlot::PlotLine("Recovered", recovered_signal->data(), recovered_signal->size());
+            size_t size = CalculatePlotSize(recovered_signal->size());
+            size_t stride = CalculatePlotStride(recovered_signal->size());
+            ImPlot::PlotLine("Recovered", recovered_signal->data(), size, stride, 0, 0,
+                             stride * sizeof(float));
         }
         ImPlot::EndPlot();
     }
@@ -87,21 +95,31 @@ void GraphsView::RenderHarmonicsGraph() {
             max_size = std::max(max_size, harmonic_phases->size());
         }
 
-        ImPlot::SetNextPlotLimits(0, max_size, min_value, max_value,
-                                  ImGuiCond_Always);
+        ImPlot::SetNextPlotLimits(0, max_size, min_value, max_value, ImGuiCond_Always);
     }
 
     const auto plot_height = ImGui::GetContentRegionAvail().y;
     if (ImPlot::BeginPlot("Harmonics", nullptr, nullptr, {-1, plot_height})) {
         if (harmonic_amplitudes) {
-            ImPlot::PlotStems("Amplitudes", harmonic_amplitudes->data(),
-                              harmonic_amplitudes->size());
+            size_t size = CalculatePlotSize(harmonic_amplitudes->size());
+            size_t stride = CalculatePlotStride(harmonic_amplitudes->size());
+            ImPlot::PlotStems("Amplitudes", harmonic_amplitudes->data(), size, 0, stride, 0, 0,
+                              stride * sizeof(float));
         }
         if (harmonic_phases) {
-            ImPlot::PlotStems("Phases", harmonic_phases->data(), harmonic_phases->size());
+            size_t size = CalculatePlotSize(harmonic_phases->size());
+            size_t stride = CalculatePlotStride(harmonic_phases->size());
+            ImPlot::PlotStems("Phases", harmonic_phases->data(), size, 0, stride, 0, 0,
+                              stride * sizeof(float));
         }
         ImPlot::EndPlot();
     }
 }
+auto GraphsView::CalculatePlotStride(size_t count) -> size_t {
+    const auto plot_size = CalculatePlotSize(count);
+    return count / plot_size;
+}
+
+auto GraphsView::CalculatePlotSize(size_t count) -> size_t { return std::min(kMaxViewSize, count); }
 
 }  // namespace fft_visualizer::view

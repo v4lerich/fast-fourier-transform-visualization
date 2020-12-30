@@ -27,7 +27,8 @@ class WorkerModel {
 
     auto GetOpenClModel() -> OpenClModel&;
     void InitWorker(std::optional<cl::Device> device);
-    void RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type);
+    void RunWorker(AlgorithmType algorithm_type, AlgorithmType inverse_algorithm_type,
+                   bool is_erasing_recovery_phases);
 
     auto GetRunVersion() -> unsigned int;
 
