@@ -39,8 +39,7 @@ class WorkerView : public View {
     Model& model_;
     std::string window_name_;
 
-    model::AlgorithmType algorithm_type_{model::AlgorithmType::kTrivial};
-    model::AlgorithmType inverse_algorithm_type_{model::AlgorithmType::kTrivial};
+    model::WorkerModel::Configuration configuration_{};
 
     unsigned int n_;
     SignalType signal_type_{SignalType::kHarmonic};
@@ -48,7 +47,6 @@ class WorkerView : public View {
     model::signal_generator::PolyharmonicSignalGenerator::Parameters polyharmonic_parameters_{1};
 
     std::random_device random_device_{};
-    bool is_erasing_recovery_phases_{};
 };
 
 }  // namespace fft_visualizer::view
