@@ -24,4 +24,13 @@ void WorkerModel::InitWorker(std::optional<cl::Device> device) {
     }
 }
 
+void WorkerModel::SetInitialSignal(const Signal& signal) {
+    initial_signal_version_++;
+    initial_signal_ = signal;
+}
+
+auto WorkerModel::GetInitialSignal() -> const std::optional<Signal>& { return initial_signal_; }
+
+auto WorkerModel::GetInitialSignalVersion() -> unsigned int { return initial_signal_version_; }
+
 }  // namespace fft_visualizer::model

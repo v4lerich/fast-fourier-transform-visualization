@@ -12,7 +12,8 @@ const std::string kDockspaceName = "main_dockspace";
 FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
     : opencl_info_view_{model.GetOpenClModel()},
       worker_picker_view_{model.GetWorkerModel()},
-      worker_view_{model.GetWorkerModel()} {}
+      worker_view_{model.GetWorkerModel()},
+      graphs_view_{model.GetWorkerModel()} {}
 
 void FftVisualizerView::Render() {
     if (BeginDockingWindow()) {
@@ -23,6 +24,9 @@ void FftVisualizerView::Render() {
 
         ImGui::SetNextWindowClass(&window_class);
         worker_view_.Render();
+
+        ImGui::SetNextWindowClass(&window_class);
+        graphs_view_.Render();
 
         EndDockingWindow();
     }
@@ -62,9 +66,11 @@ void FftVisualizerView::InitDockingLayout() {
         ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowViewport()->Size);
 
         ImGuiID dock_main_id = dockspace_id;
-        ImGuiID dock_left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.4, nullptr, &dock_main_id);
+        ImGuiID dock_left_id =
+            ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.4, nullptr, &dock_main_id);
 
         ImGui::DockBuilderDockWindow(worker_view_.GetWindowName().c_str(), dock_left_id);
+        ImGui::DockBuilderDockWindow(graphs_view_.GetWindowName().c_str(), dock_main_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
     }

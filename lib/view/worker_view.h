@@ -23,7 +23,6 @@ class WorkerView : public View {
     explicit WorkerView(Model& model, std::string window_name = "worker_view");
 
     void Render() override;
-
     auto GetWindowName() -> const std::string&;
 
   private:
@@ -33,6 +32,7 @@ class WorkerView : public View {
     void RenderPolyharmonicSignalParameters();
 
     void RandomizeSignalParameters();
+    void GenerateSignal();
     static auto GetNValue(unsigned int index) -> unsigned int;
 
     Model& model_;

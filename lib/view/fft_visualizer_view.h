@@ -3,6 +3,7 @@
 
 #include <fft_visualizer_model.h>
 
+#include "graphs_view.h"
 #include "open_cl_info_view.h"
 #include "view.h"
 #include "worker_picker_view.h"
@@ -26,6 +27,7 @@ class FftVisualizerView final : public View {
     WorkerView worker_view_;
     OpenClInfoView opencl_info_view_;
     WorkerPickerView worker_picker_view_;
+    GraphsView graphs_view_;
 };
 
 }  // namespace fft_visualizer::view

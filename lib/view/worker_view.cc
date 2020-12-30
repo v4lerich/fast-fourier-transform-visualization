@@ -7,6 +7,8 @@
 #include <random>
 #include <utility>
 
+#include "view.h"
+
 namespace fft_visualizer::view {
 
 static std::vector<unsigned int> kLogNOptions = {6,  7,  8,  9,  10, 11, 12, 13,
@@ -29,10 +31,7 @@ WorkerView::WorkerView(Model& model, std::string window_name)
 
 void WorkerView::Render() {
     if (ImGui::Begin(window_name_.c_str())) {
-        const std::string header = "Parameters";
-        const float font_size = ImGui::GetFontSize() * header.size() / 2;
-        ImGui::SameLine(ImGui::GetWindowSize().x / 2 - (font_size / 2));
-        ImGui::Text("%s", header.c_str());
+        CenterText("Parameters");
         ImGui::Separator();
 
         RenderNOptionsCombo();
@@ -51,6 +50,14 @@ void WorkerView::Render() {
             RenderHarmonicSignalParameters();
         } else if (signal_type_ == SignalType::kPolyharmonic) {
             RenderPolyharmonicSignalParameters();
+        }
+        ImGui::NewLine();
+        ImGui::Dummy({0, 0});
+
+        CenterText("Control");
+        ImGui::Separator();
+        if (ImGui::Button("Generate signal")) {
+            GenerateSignal();
         }
 
         ImGui::End();
@@ -103,7 +110,8 @@ void WorkerView::RenderPolyharmonicSignalParameters() {
     polyharmonic_parameters_.resize(harmonics_count);
 
     ImGui::NewLine();
-    if (ImGui::BeginChild("Harmonics", {0, 0}, true, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+    if (ImGui::BeginChild("Harmonics", {0, 300.0f}, true,
+                          ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         for (size_t i = 0; i < polyharmonic_parameters_.size(); i++) {
             if (i != 0) {
                 ImGui::Spacing();
@@ -135,8 +143,8 @@ void WorkerView::RandomizeSignalParameters() {
     std::mt19937 generator(random_device_());
     std::uniform_real_distribution<float> harmonic_distribution(kHarmonicRange.first,
                                                                 kHarmonicRange.second);
-    std::uniform_real_distribution<float> amplitude_distribution(kAmplitudeRange.first,
-                                                                 kAmplitudeRange.second);
+    std::normal_distribution<float> amplitude_distribution((kAmplitudeRange.first + kAmplitudeRange.second) / 2,
+                                                           (kAmplitudeRange.second - kAmplitudeRange.first) / 6);
     std::uniform_real_distribution<float> phase_distribution(kPhaseRange.first, kPhaseRange.second);
 
     harmonic_parameters_.amplitude = amplitude_distribution(generator);
@@ -146,6 +154,22 @@ void WorkerView::RandomizeSignalParameters() {
     for (auto& harmonic : polyharmonic_parameters_) {
         harmonic.amplitude = amplitude_distribution(generator);
         harmonic.phase = phase_distribution(generator);
+    }
+}
+
+void WorkerView::GenerateSignal() {
+    std::unique_ptr<model::signal_generator::SignalGenerator> signal_generator;
+    if (signal_type_ == SignalType::kHarmonic) {
+        signal_generator = std::make_unique<model::signal_generator::HarmonicSignalGenerator>(
+            harmonic_parameters_);
+    } else if (signal_type_ == SignalType::kPolyharmonic) {
+        signal_generator = std::make_unique<model::signal_generator::PolyharmonicSignalGenerator>(
+            std::begin(polyharmonic_parameters_), std::end(polyharmonic_parameters_));
+    }
+
+    if (signal_generator) {
+        const auto signal = signal_generator->Generate(n_);
+        model_.SetInitialSignal(signal);
     }
 }
 
