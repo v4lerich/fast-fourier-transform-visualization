@@ -23,11 +23,14 @@ class FftVisualizerView final : public View {
     void EndDockingWindow();
     void InitDockingLayout();
     void RenderMenuBar();
+    void RenderErrorPopup();
 
+    Model& model_;
     WorkerView worker_view_;
     OpenClInfoView opencl_info_view_;
     WorkerPickerView worker_picker_view_;
     GraphsView graphs_view_;
+    bool show_error_{};
 };
 
 }  // namespace fft_visualizer::view

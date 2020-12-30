@@ -9,6 +9,8 @@ FftVisualizerModel::FftVisualizerModel()
 
 void FftVisualizerModel::SetCurrentError(std::optional<Error> error) { error_ = error; }
 
+auto FftVisualizerModel::GetCurrentError() -> const std::optional<Error>& { return error_; }
+
 auto FftVisualizerModel::GetOpenClModel() -> OpenClModel& { return opencl_model_; }
 
 auto FftVisualizerModel::GetWorkerModel() -> WorkerModel& { return worker_model_; }

@@ -15,7 +15,9 @@ class FftVisualizerModel final  {
 
     auto GetOpenClModel() -> OpenClModel&;
     auto GetWorkerModel() -> WorkerModel&;
+
     void SetCurrentError(std::optional<Error> error);
+    auto GetCurrentError() -> const std::optional<Error>&;
 
   private:
     std::optional<Error> error_;

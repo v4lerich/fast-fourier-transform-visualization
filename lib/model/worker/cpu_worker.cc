@@ -68,7 +68,7 @@ void CpuWorker::GenericFastFourierTransform(Worker::ComplexSignal& harmonics, bo
     }
 
     const auto w_sign = invert ? -1 : 1;
-    for (unsigned int m = 1; m <= n; m <<= 1) {
+    for (unsigned int m = 2; m <= n; m <<= 1) {
         const auto w_m_phase = w_sign * 2.0f * std::numbers::pi_v<float> / m * 1if;
         const auto w_m = std::exp(w_m_phase);
 

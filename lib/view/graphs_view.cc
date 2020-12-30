@@ -29,19 +29,25 @@ void GraphsView::RenderSignalsGraph() {
     decltype(auto) recovered_signal = worker_model_.GetRecoveredSignal();
 
     if (const auto run_version = worker_model_.GetRunVersion(); run_version_ != run_version) {
-        const auto min_initial_value =
-            *std::min_element(std::begin(*initial_signal), std::end(*initial_signal));
-        const auto max_initial_value =
-            *std::max_element(std::begin(*initial_signal), std::end(*initial_signal));
+        auto min_value = std::numeric_limits<float>::max();
+        auto max_value = std::numeric_limits<float>::min();
 
-        const auto min_recovered_value =
-            *std::min_element(std::begin(*recovered_signal), std::end(*recovered_signal));
-        const auto max_recovered_value =
-            *std::max_element(std::begin(*recovered_signal), std::end(*recovered_signal));
+        if (initial_signal) {
+            min_value = std::min(min_value, *std::min_element(std::begin(*initial_signal),
+                                                              std::end(*initial_signal)));
+            max_value = std::max(max_value, *std::max_element(std::begin(*initial_signal),
+                                                              std::end(*initial_signal)));
+        }
 
-        ImPlot::SetNextPlotLimits(
-            0, initial_signal->size(), std::min(min_initial_value, min_recovered_value),
-            std::max(max_initial_value, max_recovered_value), ImGuiCond_Always);
+        if (recovered_signal) {
+            min_value = std::min(min_value, *std::min_element(std::begin(*recovered_signal),
+                                                              std::end(*recovered_signal)));
+            max_value = std::max(max_value, *std::max_element(std::begin(*recovered_signal),
+                                                              std::end(*recovered_signal)));
+        }
+
+        ImPlot::SetNextPlotLimits(0, initial_signal->size(), min_value, max_value,
+                                  ImGuiCond_Always);
     }
 
     const auto plot_height = ImGui::GetContentRegionAvail().y * 0.5f;
@@ -61,19 +67,28 @@ void GraphsView::RenderHarmonicsGraph() {
     decltype(auto) harmonic_phases = worker_model_.GetHarmonicPhases();
 
     if (const auto run_version = worker_model_.GetRunVersion(); run_version_ != run_version) {
-        const auto min_amplitude =
-            *std::min_element(std::begin(*harmonic_amplitudes), std::end(*harmonic_amplitudes));
-        const auto max_amplitude =
-            *std::max_element(std::begin(*harmonic_amplitudes), std::end(*harmonic_amplitudes));
+        auto min_value = std::numeric_limits<float>::max();
+        auto max_value = std::numeric_limits<float>::min();
+        size_t max_size = 0;
 
-        const auto min_phase =
-            *std::min_element(std::begin(*harmonic_phases), std::end(*harmonic_phases));
-        const auto max_phase =
-            *std::max_element(std::begin(*harmonic_phases), std::end(*harmonic_phases));
+        if (harmonic_amplitudes) {
+            min_value = std::min(min_value, *std::min_element(std::begin(*harmonic_amplitudes),
+                                                              std::end(*harmonic_amplitudes)));
+            max_value = std::max(max_value, *std::max_element(std::begin(*harmonic_amplitudes),
+                                                              std::end(*harmonic_amplitudes)));
+            max_size = std::max(max_size, harmonic_amplitudes->size());
+        }
 
-        ImPlot::SetNextPlotLimits(0, harmonic_amplitudes->size(),
-                                  std::min(min_phase, min_amplitude),
-                                  std::max(max_phase, max_amplitude), ImGuiCond_Always);
+        if (harmonic_phases) {
+            min_value = std::min(min_value, *std::min_element(std::begin(*harmonic_phases),
+                                                              std::end(*harmonic_phases)));
+            max_value = std::max(max_value, *std::max_element(std::begin(*harmonic_phases),
+                                                              std::end(*harmonic_phases)));
+            max_size = std::max(max_size, harmonic_phases->size());
+        }
+
+        ImPlot::SetNextPlotLimits(0, max_size, min_value, max_value,
+                                  ImGuiCond_Always);
     }
 
     const auto plot_height = ImGui::GetContentRegionAvail().y;

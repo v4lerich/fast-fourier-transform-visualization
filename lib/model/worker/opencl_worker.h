@@ -20,13 +20,12 @@ class OpenClWorker : public Worker {
 
   private:
     typedef cl::make_kernel<cl_uint, cl::Buffer&, cl_uint, cl::Buffer&> FourierKernel;
-    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&, cl_uint, cl_bool> FftStepKernel;
-    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&> FftDivideStepKernel;
-    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&> FftShuffleKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&, cl::Buffer&, cl_uint, cl_uint> FftStepKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&> FftDivideStepKernel;
+    typedef cl::make_kernel<cl_uint, cl::Buffer&> FftShuffleKernel;
 
     void GenericFastFourierTransform(ComplexSignal& harmonics, bool invert);
-    auto CalculateEnqueueArgs(cl::CommandQueue& queue, cl::Event& event, size_t n)
-        -> cl::EnqueueArgs const;
+    auto CalculateEnqueueArgs(cl::CommandQueue& queue, size_t n) -> cl::EnqueueArgs const;
 
     template <typename T>
     auto LinkKernel(const cl::Program& program, const std::string& kernel_name) -> T;

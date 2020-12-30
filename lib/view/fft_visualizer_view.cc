@@ -10,7 +10,8 @@ namespace fft_visualizer::view {
 const std::string kDockspaceName = "main_dockspace";
 
 FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
-    : opencl_info_view_{model.GetOpenClModel()},
+    : model_{model},
+      opencl_info_view_{model.GetOpenClModel()},
       worker_picker_view_{model.GetWorkerModel()},
       worker_view_{model.GetWorkerModel()},
       graphs_view_{model.GetWorkerModel()} {}
@@ -33,6 +34,7 @@ void FftVisualizerView::Render() {
 
     opencl_info_view_.Render();
     worker_picker_view_.Render();
+    RenderErrorPopup();
 }
 
 auto FftVisualizerView::BeginDockingWindow() -> bool {
@@ -103,6 +105,29 @@ void FftVisualizerView::RenderMenuBar() {
 
         ImGui::EndMenuBar();
     }
+}
+
+void FftVisualizerView::RenderErrorPopup() {
+    auto error = model_.GetCurrentError();
+    std::string window_title = std::string(error ? error->WhatTitle() : "") + "##error";
+    if (error) {
+        ImGui::OpenPopup(window_title.c_str());
+        show_error_ = true;
+    }
+
+    const ImVec2 window_size{ImGui::GetIO().DisplaySize.x * 0.7f,
+                             ImGui::GetIO().DisplaySize.y * 0.7f};
+    ImGui::SetNextWindowSize(window_size, ImGuiCond_Appearing);
+
+    if (ImGui::BeginPopupModal(window_title.c_str(), &show_error_)) {
+        if (error) {
+            ImGui::Text("%s", error->what());
+            ImGui::Separator();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (!show_error_) model_.SetCurrentError(std::nullopt);
 }
 
 }  // namespace fft_visualizer::view
