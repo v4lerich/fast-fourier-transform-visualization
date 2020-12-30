@@ -10,7 +10,11 @@ namespace fft_visualizer::view {
 const std::string kDockspaceName = "main_dockspace";
 
 FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
-    : opencl_info_view_{model.GetOpenClModel()} {}
+    : model_{model},
+      opencl_info_view_{model.GetOpenClModel()},
+      worker_picker_view_{model.GetWorkerModel()},
+      worker_view_{model.GetWorkerModel()},
+      graphs_view_{model.GetWorkerModel()} {}
 
 void FftVisualizerView::Render() {
     if (BeginDockingWindow()) {
@@ -19,10 +23,18 @@ void FftVisualizerView::Render() {
         ImGuiWindowClass window_class;
         window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 
+        ImGui::SetNextWindowClass(&window_class);
+        worker_view_.Render();
+
+        ImGui::SetNextWindowClass(&window_class);
+        graphs_view_.Render();
+
         EndDockingWindow();
     }
 
     opencl_info_view_.Render();
+    worker_picker_view_.Render();
+    RenderErrorPopup();
 }
 
 auto FftVisualizerView::BeginDockingWindow() -> bool {
@@ -56,20 +68,30 @@ void FftVisualizerView::InitDockingLayout() {
         ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowViewport()->Size);
 
         ImGuiID dock_main_id = dockspace_id;
+        ImGuiID dock_left_id =
+            ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.4, nullptr, &dock_main_id);
+
+        ImGui::DockBuilderDockWindow(worker_view_.GetWindowName().c_str(), dock_left_id);
+        ImGui::DockBuilderDockWindow(graphs_view_.GetWindowName().c_str(), dock_main_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
     }
 }
 
-void FftVisualizerView::EndDockingWindow() {
-    ImGui::End();
-}
+void FftVisualizerView::EndDockingWindow() { ImGui::End(); }
 
 void FftVisualizerView::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Exit")) {
                 SetWantClose();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Worker")) {
+            if (ImGui::MenuItem("Choose device")) {
+                worker_picker_view_.Show();
             }
             ImGui::EndMenu();
         }
@@ -83,6 +105,29 @@ void FftVisualizerView::RenderMenuBar() {
 
         ImGui::EndMenuBar();
     }
+}
+
+void FftVisualizerView::RenderErrorPopup() {
+    auto error = model_.GetCurrentError();
+    std::string window_title = std::string(error ? error->WhatTitle() : "") + "##error";
+    if (error) {
+        ImGui::OpenPopup(window_title.c_str());
+        show_error_ = true;
+    }
+
+    const ImVec2 window_size{ImGui::GetIO().DisplaySize.x * 0.7f,
+                             ImGui::GetIO().DisplaySize.y * 0.7f};
+    ImGui::SetNextWindowSize(window_size, ImGuiCond_Appearing);
+
+    if (ImGui::BeginPopupModal(window_title.c_str(), &show_error_)) {
+        if (error) {
+            ImGui::Text("%s", error->what());
+            ImGui::Separator();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (!show_error_) model_.SetCurrentError(std::nullopt);
 }
 
 }  // namespace fft_visualizer::view

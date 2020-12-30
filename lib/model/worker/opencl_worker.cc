@@ -19,9 +19,10 @@ OpenClWorker::OpenClWorker(const cl::Context& context)
 
       fft_program_{ImportProgram(context, kFftProgramPath)},
       fft_step_kernel_{LinkKernel<decltype(fft_step_kernel_)>(fft_program_, "fft_step_kernel")},
-      fft_divide_step_kernel_{LinkKernel<decltype(fft_divide_step_kernel_)>(fft_program_, "fft_divide_step_kernel")},
-      fft_shuffle_kernel_{LinkKernel<decltype(fft_shuffle_kernel_)>(fft_program_, "fft_shuffle_kernel")}
-      {}
+      fft_divide_step_kernel_{
+          LinkKernel<decltype(fft_divide_step_kernel_)>(fft_program_, "fft_divide_step_kernel")},
+      fft_shuffle_kernel_{
+          LinkKernel<decltype(fft_shuffle_kernel_)>(fft_program_, "fft_shuffle_kernel")} {}
 
 auto OpenClWorker::ImportProgram(const cl::Context& context, const std::filesystem::path& path)
     -> cl::Program {
@@ -48,8 +49,9 @@ auto OpenClWorker::BuildProgram(const cl::Context& context,
             cl_build_status status = program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(device);
             if (status != CL_BUILD_ERROR) continue;
 
-            ss << "\t" << device.getInfo<CL_DEVICE_NAME>() << ": "
-               << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << std::endl;
+            const auto build_log = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+            ss << "\t" << device.getInfo<CL_DEVICE_NAME>().c_str() << ": " << build_log.c_str()
+               << std::endl;
         }
 
         throw Error{ss.str(), "OpenCL program build error"};
@@ -97,10 +99,11 @@ auto OpenClWorker::DiscreteFourierTransform(const Signal& signal) -> ComplexSign
     std::vector<cl_float2> harmonic_values(m);
     queue.enqueueReadBuffer(harmonics_buffer, CL_TRUE, 0, m * sizeof(cl_float2),
                             harmonic_values.data(), nullptr, &event);
+    queue.finish();
 
     ComplexSignal harmonics(m);
     for (unsigned int i = 0; i < m; i++) {
-        harmonics[i] = {harmonic_values[i].s[0], harmonic_values[i].s[1]};
+        harmonics[i] = {harmonic_values[i].s0, harmonic_values[i].s1};
     }
     return harmonics;
 }
@@ -138,13 +141,13 @@ auto OpenClWorker::InverseDiscreteFourierTransform(const Worker::ComplexSignal& 
 
     // Read result
     Signal signal(n);
-    queue.enqueueReadBuffer(harmonics_buffer, CL_TRUE, 0, n * sizeof(cl_float), signal.data(),
-                            nullptr, &event);
+    queue.enqueueReadBuffer(signal_buffer, CL_TRUE, 0, n * sizeof(cl_float), signal.data(), nullptr,
+                            &event);
+    queue.finish();
     return signal;
 }
 
-
-auto OpenClWorker::FastFourierTransform(const Signal & signal) -> ComplexSignal {
+auto OpenClWorker::FastFourierTransform(const Signal& signal) -> ComplexSignal {
     const auto n = signal.size();
 
     ComplexSignal harmonics(n);
@@ -155,11 +158,11 @@ auto OpenClWorker::FastFourierTransform(const Signal & signal) -> ComplexSignal 
     return harmonics;
 }
 
-auto OpenClWorker::InverseFastFourierTransform(const ComplexSignal & harmonics) -> Signal{
+auto OpenClWorker::InverseFastFourierTransform(const ComplexSignal& harmonics) -> Signal {
     const auto n = harmonics.size();
 
     ComplexSignal complex_signal = harmonics;
-    GenericFastFourierTransform(complex_signal, false);
+    GenericFastFourierTransform(complex_signal, true);
 
     Signal signal(n);
     for (size_t i = 0; i < n; i++) {
@@ -173,48 +176,65 @@ void OpenClWorker::GenericFastFourierTransform(ComplexSignal& harmonics, bool in
     std::vector<cl_float2> harmonic_values(n);
 
     cl_int error = CL_SUCCESS;
-    cl::Event event;
     cl::CommandQueue queue{context_};
-    auto enqueue_args = CalculateEnqueueArgs(queue,event,n);
+    auto enqueue_args = CalculateEnqueueArgs(queue, n);
 
     // Create buffers
-    cl::Buffer harmonics_in_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr, &error);
-    cl::Buffer harmonics_out_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr, &error);
+    try {
+        cl::Buffer harmonics_in_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr,
+                                       &error);
+        cl::Buffer harmonics_out_buffer(context_, CL_MEM_READ_WRITE, n * sizeof(cl_float2), nullptr,
+                                        &error);
 
-    for (size_t i = 0; i < n; i++) {
-        harmonic_values[i] = {harmonics[i].real(), harmonics[i].imag()};
-    }
-    queue.enqueueWriteBuffer(harmonics_in_buffer, CL_TRUE, 0, n * sizeof(cl_float2), harmonic_values.data(), nullptr, &event);
-    queue.finish();
+        for (size_t i = 0; i < n; i++) {
+            harmonic_values[i] = {harmonics[i].real(), harmonics[i].imag()};
+        }
+        queue.enqueueWriteBuffer(harmonics_in_buffer, CL_TRUE, 0, n * sizeof(cl_float2),
+                                 harmonic_values.data());
+        queue.finish();
 
-    // Execute algorithm
-    fft_shuffle_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer);
+        for (size_t i = 0; i < n; i++) {
+            harmonic_values[i] = {0, 0};
+        }
+        queue.enqueueWriteBuffer(harmonics_out_buffer, CL_TRUE, 0, n * sizeof(cl_float2),
+                                 harmonic_values.data());
+        queue.finish();
 
-    for (unsigned int m = 2; m <= n; m <<= 1) {
+        // Execute algorithm
+        fft_shuffle_kernel_(enqueue_args, n, harmonics_in_buffer);
+        queue.finish();
+
+        for (unsigned int m = 2; m <= n; m <<= 1) {
+            fft_step_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer, m,
+                             invert ? CL_TRUE : CL_FALSE);
+            queue.finish();
+            std::swap(harmonics_in_buffer, harmonics_out_buffer);
+        }
         std::swap(harmonics_in_buffer, harmonics_out_buffer);
-        fft_step_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer, m, invert);
-    }
 
-    if (invert) {
-        std::swap(harmonics_in_buffer, harmonics_out_buffer);
-        fft_divide_step_kernel_(enqueue_args, n, harmonics_in_buffer, harmonics_out_buffer);
-    }
-    queue.finish();
+        if (!invert) {
+            fft_divide_step_kernel_(enqueue_args, n, harmonics_out_buffer);
+            queue.finish();
+        }
 
-    // Read result
-    queue.enqueueReadBuffer(harmonics_out_buffer, CL_TRUE, 0, n * sizeof(cl_float2), harmonic_values.data(), nullptr, &event);
-    queue.finish();
+        // Read result
+        queue.enqueueReadBuffer(harmonics_out_buffer, CL_TRUE, 0, n * sizeof(cl_float2),
+                                harmonic_values.data());
+        queue.finish();
+    } catch (cl::Error& error) {
+        throw Error{error.what(), "OpenCL runtime error"};
+    }
     for (size_t i = 0; i < n; i++) {
         harmonics[i] = {harmonic_values[i].s0, harmonic_values[i].s1};
     }
 }
 
-auto OpenClWorker::CalculateEnqueueArgs(cl::CommandQueue& queue, cl::Event& event, size_t n) -> cl::EnqueueArgs const {
-    cl::NDRange local_size{16};
+auto OpenClWorker::CalculateEnqueueArgs(cl::CommandQueue& queue, size_t n)
+    -> cl::EnqueueArgs const {
+    cl::NDRange local_size{1};
     size_t local_groups = std::ceil(float(n) / local_size[0]);
     cl::NDRange global_size{local_groups * local_size[0]};
-    return {queue, event, global_size, local_size};
+    return {queue, global_size, local_size};
 }
 
-}
-
+}  // namespace fft_visualizer::model::worker

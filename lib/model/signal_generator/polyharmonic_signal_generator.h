@@ -1,5 +1,5 @@
-#ifndef FFT_VISUALIZER_POLYGARMONIC_SIGNAL_GENERATOR_H
-#define FFT_VISUALIZER_POLYGARMONIC_SIGNAL_GENERATOR_H
+#ifndef FFT_VISUALIZER_POLYHARMONIC_SIGNAL_GENERATOR_H
+#define FFT_VISUALIZER_POLYHARMONIC_SIGNAL_GENERATOR_H
 
 #include <vector>
 
@@ -7,17 +7,18 @@
 
 namespace fft_visualizer::model::signal_generator {
 
-class PolygarmonicSignalGenerator final : public SignalGenerator {
+class PolyharmonicSignalGenerator final : public SignalGenerator {
   public:
-    struct GarmonicParameters {
-        float amplitude;
+    struct HarmonicParameters {
+        float amplitude = 1.0f;
         float phase;
     };
+    using Parameters = std::vector<HarmonicParameters>;
 
     template <typename IteratorType>
-    requires std::same_as<PolygarmonicSignalGenerator::GarmonicParameters,
+    requires std::same_as<HarmonicParameters,
                           typename std::iterator_traits<IteratorType>::value_type>
-    PolygarmonicSignalGenerator(IteratorType from, IteratorType to) {
+    PolyharmonicSignalGenerator(IteratorType from, IteratorType to) {
         for (IteratorType it = from; it != to; it++) {
             harmonics_parameters.push_back(*it);
         }
@@ -26,9 +27,9 @@ class PolygarmonicSignalGenerator final : public SignalGenerator {
     auto Generate(unsigned int count) -> Signal const override;
 
   private:
-    std::vector<GarmonicParameters> harmonics_parameters;
+    Parameters harmonics_parameters;
 };
 
 }  // namespace fft_visualizer::model::signal_generator
 
-#endif  // FFT_VISUALIZER_POLYGARMONIC_SIGNAL_GENERATOR_H
+#endif  // FFT_VISUALIZER_POLYHARMONIC_SIGNAL_GENERATOR_H

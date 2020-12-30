@@ -9,7 +9,7 @@ namespace fft_visualizer::model {
 
 OpenClModel::OpenClModel(OpenClModel::Model& model) : model_{model} {}
 
-auto OpenClModel::GetOpenClInfo() -> std::optional<OpenClInfo> {
+auto OpenClModel::GetInfo() -> std::optional<OpenClInfo> {
     try {
         cl_uint error = CL_SUCCESS;
         std::vector<cl::Platform> platforms;
@@ -42,5 +42,18 @@ auto OpenClModel::GetOpenClInfo() -> std::optional<OpenClInfo> {
         return std::nullopt;
     }
 }
+
+void OpenClModel::ResetDevice(std::optional<cl::Device> device) {
+    device_ = device;
+    context_ = std::nullopt;
+
+    if (device) {
+        context_ = cl::Context{*device};
+    }
+}
+
+auto OpenClModel::GetDevice() -> const std::optional<cl::Device>& { return device_; }
+
+auto OpenClModel::GetContext() -> const std::optional<cl::Context>& { return context_; }
 
 }  // namespace fft_visualizer::model

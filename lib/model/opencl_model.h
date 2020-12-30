@@ -8,7 +8,6 @@
 
 namespace fft_visualizer::model {
 
-
 struct OpenClDeviceInfo {
     cl::Device device;
 };
@@ -29,10 +28,17 @@ class OpenClModel final {
     using Model = FftVisualizerModel;
 
     OpenClModel(Model& model);
-    auto GetOpenClInfo() -> std::optional<OpenClInfo>;
+    auto GetInfo() -> std::optional<OpenClInfo>;
+
+    void ResetDevice(std::optional<cl::Device> device);
+    auto GetDevice() -> const std::optional<cl::Device>&;
+    auto GetContext() -> const std::optional<cl::Context>&;
 
   private:
     Model& model_;
+
+    std::optional<cl::Context> context_;
+    std::optional<cl::Device> device_;
 };
 
 }  // namespace fft_visualizer::model

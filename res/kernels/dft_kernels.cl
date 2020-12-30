@@ -5,12 +5,12 @@ float2 dft_harmonic(uint j, uint n, global const float* signal) {
         float phase = 2 * M_PI_F * i * j / n;
         harmonic += signal[i] * (float2)(cos(phase), sin(phase));
     }
-    return harmonic;
+    return harmonic / n;
 }
 
 kernel void dft_kernel(uint n, global const float* signal, uint m, global float2* harmonics) {
     for (uint j = get_global_id(0); j < m; j += get_global_size(0)) {
-        harmonic = dft_harmonic(j, n, signal);
+        harmonics[j] = dft_harmonic(j, n, signal);
     }
 }
 
@@ -26,6 +26,6 @@ float inverse_dft_value(uint i, uint n, uint m, global const float2* harmonics) 
 
 kernel void inverse_dft_kernel(uint m, global const float2* harmonics, uint n, global float* signal) {
     for (uint i = get_global_id(0); i < n; i += get_global_size(0)) {
-        signal[i] = inverse_dft_signal(i, n, m, signal);
+        signal[i] = inverse_dft_value(i, n, m, harmonics);
     }
 }

@@ -13,7 +13,7 @@ OpenClInfoView::OpenClInfoView(OpenClInfoView::Model& model) : model_{model} {}
 static const std::string kPopupName = "OpenCL info";
 
 void OpenClInfoView::Show() {
-    opencl_info_ = model_.GetOpenClInfo();
+    opencl_info_ = model_.GetInfo();
     show_ = bool(opencl_info_);
 }
 
