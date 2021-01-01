@@ -56,10 +56,10 @@ To run application:
 cd ./bin
 
 # for WINDOWS
-./fast-fourier-transform-visualization.exe
+./fft-visualization.exe
 
 # for Linux
-./fast-fourier-transform-visualization
+./fft-transform-visualization
 ```
 
 Tested on:
