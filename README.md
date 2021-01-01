@@ -4,7 +4,7 @@ Program written on C++ with OpenCL to learn how to use FFT with different signal
 
 ![Application GUI view](./res/screenshot1.png)
 
-##What is this?
+## What is this?
 
 Application create mainly for OpenCL learning purpose.
 Applies forward and inverse [DFT](https://en.wikipedia.org/wiki/Discrete_Fourier_transform) or [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform) to harmonic or polyharmonic signal.
@@ -18,7 +18,7 @@ Created with:
 * [ImGui](https://github.com/ocornut/imgui/) with [ImPlot](https://github.com/epezent/implot)
 * [OpenCL](https://wikipedia.org/wiki/OpenCL) v1.2
 
-##How to build
+## How to build
 
 Requirements:
 * OpenGL >= 4.2, or otherwise:
