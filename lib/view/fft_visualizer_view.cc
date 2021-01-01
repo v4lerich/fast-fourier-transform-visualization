@@ -17,20 +17,19 @@ FftVisualizerView::FftVisualizerView(FftVisualizerView::Model& model)
       graphs_view_{model.GetWorkerModel()} {}
 
 void FftVisualizerView::Render() {
-    if (BeginDockingWindow()) {
-        RenderMenuBar();
+    BeginDockingWindow();
+    RenderMenuBar();
 
-        ImGuiWindowClass window_class;
-        window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+    ImGuiWindowClass window_class;
+    window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 
-        ImGui::SetNextWindowClass(&window_class);
-        worker_view_.Render();
+    ImGui::SetNextWindowClass(&window_class);
+    worker_view_.Render();
 
-        ImGui::SetNextWindowClass(&window_class);
-        graphs_view_.Render();
+    ImGui::SetNextWindowClass(&window_class);
+    graphs_view_.Render();
 
-        EndDockingWindow();
-    }
+    EndDockingWindow();
 
     opencl_info_view_.Render();
     worker_picker_view_.Render();
@@ -55,8 +54,8 @@ auto FftVisualizerView::BeginDockingWindow() -> bool {
 
     if (is_visible) {
         InitDockingLayout();
-        ImGui::DockSpace(ImGui::GetID(kDockspaceName.c_str()), {0, 0});
     }
+    ImGui::DockSpace(ImGui::GetID(kDockspaceName.c_str()), {0, 0});
     return is_visible;
 }
 

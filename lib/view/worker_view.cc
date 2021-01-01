@@ -34,45 +34,44 @@ WorkerView::WorkerView(Model& model, std::string window_name)
     : model_{model}, window_name_{std::move(window_name)}, n_{GetNValue(0)} {}
 
 void WorkerView::Render() {
-    if (ImGui::Begin(window_name_.c_str())) {
-        CenterText("Parameters");
-        ImGui::Separator();
+    ImGui::Begin(window_name_.c_str());
+    CenterText("Parameters");
+    ImGui::Separator();
 
-        RenderNOptionsCombo();
-        ImGui::NewLine();
+    RenderNOptionsCombo();
+    ImGui::NewLine();
 
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.35f);
-        RenderSignalTypeCombo();
-        ImGui::SameLine(0, 100.0f);
-        if (ImGui::Button("Randomize")) {
-            RandomizeSignalParameters();
-        }
-
-        ImGui::PopItemWidth();
-        ImGui::Spacing();
-        if (signal_type_ == SignalType::kHarmonic) {
-            RenderHarmonicSignalParameters();
-        } else if (signal_type_ == SignalType::kPolyharmonic) {
-            RenderPolyharmonicSignalParameters();
-        }
-        ImGui::NewLine();
-        ImGui::Dummy({0, 0});
-
-        CenterText("Control");
-        ImGui::Separator();
-        if (ImGui::Button("Run")) {
-            RunWorker();
-        }
-
-        RenderAlgorithmTypeCombo("Forward algorithm", configuration_.algorithm_type);
-        RenderAlgorithmTypeCombo("Inverse algorithm", configuration_.inverse_algorithm_type);
-        ImGui::Checkbox("Erase phases for recovering signal?", &configuration_.erase_phases);
-        ImGui::DragIntRange2(
-            "Preserve harmonics", reinterpret_cast<int*>(&configuration_.preserve_harmonics_from),
-            reinterpret_cast<int*>(&configuration_.preserve_harmonics_to), 1.0f, 0, n_);
-
-        ImGui::End();
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.35f);
+    RenderSignalTypeCombo();
+    ImGui::SameLine(0, 100.0f);
+    if (ImGui::Button("Randomize")) {
+        RandomizeSignalParameters();
     }
+
+    ImGui::PopItemWidth();
+    ImGui::Spacing();
+    if (signal_type_ == SignalType::kHarmonic) {
+        RenderHarmonicSignalParameters();
+    } else if (signal_type_ == SignalType::kPolyharmonic) {
+        RenderPolyharmonicSignalParameters();
+    }
+    ImGui::NewLine();
+    ImGui::Dummy({0, 0});
+
+    CenterText("Control");
+    ImGui::Separator();
+    if (ImGui::Button("Run")) {
+        RunWorker();
+    }
+
+    RenderAlgorithmTypeCombo("Forward algorithm", configuration_.algorithm_type);
+    RenderAlgorithmTypeCombo("Inverse algorithm", configuration_.inverse_algorithm_type);
+    ImGui::Checkbox("Erase phases for recovering signal?", &configuration_.erase_phases);
+    ImGui::DragIntRange2(
+        "Preserve harmonics", reinterpret_cast<int*>(&configuration_.preserve_harmonics_from),
+        reinterpret_cast<int*>(&configuration_.preserve_harmonics_to), 1.0f, 0, n_);
+
+    ImGui::End();
 }
 
 auto WorkerView::GetWindowName() -> const std::string& { return window_name_; }
@@ -121,31 +120,29 @@ void WorkerView::RenderPolyharmonicSignalParameters() {
     polyharmonic_parameters_.resize(harmonics_count);
 
     ImGui::NewLine();
-    if (ImGui::BeginChild("Harmonics", {0, 300.0f}, true,
-                          ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
-        for (size_t i = 0; i < polyharmonic_parameters_.size(); i++) {
-            if (i != 0) {
-                ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
-            }
-
-            ImGui::Text("Harmonic #%2d", i + 1);
-
-            ImGui::PushID(i);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.35f);
-
-            ImGui::DragFloat("Amplitude", &polyharmonic_parameters_[i].amplitude, 0.1f,
-                             kAmplitudeRange.first, kAmplitudeRange.second);
-            ImGui::SameLine();
-            ImGui::DragFloat("Phase", &polyharmonic_parameters_[i].phase, 0.01f, kPhaseRange.first,
-                             kPhaseRange.second);
-
-            ImGui::PopItemWidth();
-            ImGui::PopID();
+    ImGui::BeginChild("Harmonics", {0, 300.0f}, true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    for (size_t i = 0; i < polyharmonic_parameters_.size(); i++) {
+        if (i != 0) {
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
         }
-        ImGui::EndChild();
+
+        ImGui::Text("Harmonic #%2d", i + 1);
+
+        ImGui::PushID(i);
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.35f);
+
+        ImGui::DragFloat("Amplitude", &polyharmonic_parameters_[i].amplitude, 0.1f,
+                         kAmplitudeRange.first, kAmplitudeRange.second);
+        ImGui::SameLine();
+        ImGui::DragFloat("Phase", &polyharmonic_parameters_[i].phase, 0.01f, kPhaseRange.first,
+                         kPhaseRange.second);
+
+        ImGui::PopItemWidth();
+        ImGui::PopID();
     }
+    ImGui::EndChild();
 }
 
 void WorkerView::RenderAlgorithmTypeCombo(std::string label, model::AlgorithmType& algorithm_type) {

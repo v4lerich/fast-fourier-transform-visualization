@@ -13,15 +13,13 @@ GraphsView::GraphsView(WorkerModel& worker_model, std::string window_name)
 auto GraphsView::GetWindowName() -> const std::string& { return window_name_; }
 
 void GraphsView::Render() {
-    if (ImGui::Begin(window_name_.c_str())) {
-        CenterText("Graphs");
-        ImGui::Separator();
+    ImGui::Begin(window_name_.c_str());
+    CenterText("Graphs");
+    ImGui::Separator();
 
-        RenderSignalsGraph();
-        RenderHarmonicsGraph();
-
-        ImGui::End();
-    }
+    RenderSignalsGraph();
+    RenderHarmonicsGraph();
+    ImGui::End();
 
     run_version_ = worker_model_.GetRunVersion();
 }

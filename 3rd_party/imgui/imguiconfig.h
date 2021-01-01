@@ -90,7 +90,7 @@
 //---- Debug Tools: Macro to break in Debugger
 // (use 'Metrics->Tools->Item Picker' to pick widgets with the mouse and break into them for easy debugging.)
 //#define IM_DEBUG_BREAK  IM_ASSERT(0)
-//#define IM_DEBUG_BREAK  __debugbreak()
+#define IM_DEBUG_BREAK  __debugbreak()
 
 //---- Debug Tools: Have the Item Picker break in the ItemAdd() function instead of ItemHoverable(),
 // (which comes earlier in the code, will catch a few extra items, allow picking items other than Hovered one.)
@@ -98,7 +98,7 @@
 //#define IMGUI_DEBUG_TOOL_ITEM_PICKER_EX
 
 //---- Debug Tools: Enable slower asserts
-//#define IMGUI_DEBUG_PARANOID
+#define IMGUI_DEBUG_PARANOID
 
 //---- Tip: You can add extra functions within the ImGui:: namespace, here or in your own headers files.
 /*
