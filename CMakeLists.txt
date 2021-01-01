@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(fft-visualizer
-        VERSION 1.0.0
+        VERSION 1.2.0
         LANGUAGES CXX)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
